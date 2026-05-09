@@ -1,7 +1,7 @@
 {
   "name": "react-native-waveform-player",
-  "version": "1.0.0",
-  "description": "audio waveform",
+  "version": "1.0.1",
+  "description": "Native React Native voice-note UI: audio player + animated waveform with scrub, speed control, and background playback. Fabric, Swift + Kotlin.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -41,18 +41,30 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "audio",
+    "audio-player",
+    "media-player",
+    "waveform",
+    "audio-waveform",
+    "waveform-visualizer",
+    "audio-visualization",
+    "voice-note",
+    "voice-message",
+    "audio-message",
+    "fabric",
+    "new-architecture"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maitrungduc1410/react-native-audio-waveform.git"
+    "url": "git+https://github.com/maitrungduc1410/react-native-waveform-player.git"
   },
   "author": "Duc Trung Mai <maitrungduc1410@gmail.com> (https://github.com/maitrungduc1410)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/maitrungduc1410/react-native-audio-waveform/issues"
+    "url": "https://github.com/maitrungduc1410/react-native-waveform-player/issues"
   },
-  "homepage": "https://github.com/maitrungduc1410/react-native-audio-waveform#readme",
+  "homepage": "https://github.com/maitrungduc1410/react-native-waveform-player#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
