@@ -102,6 +102,14 @@ final class AudioPlayerEngine {
 
     deinit {
         teardownObservers()
+        // ARC will release `player` immediately after this returns, and
+        // AVPlayer is supposed to stop on dealloc — but in practice it
+        // can survive briefly if a background `AVAudioSession` keeps it
+        // alive. Pausing + dropping the current item synchronously here
+        // guarantees the audio actually stops, even if our `reset()` was
+        // never called.
+        player.pause()
+        player.replaceCurrentItem(with: nil)
     }
 
     // MARK: - Public API

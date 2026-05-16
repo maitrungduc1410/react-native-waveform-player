@@ -299,6 +299,11 @@ using namespace facebook::react;
 
 - (void)prepareForRecycle
 {
+  // Stop the player BEFORE anything else — Fabric pools this component view,
+  // so without an explicit teardown the underlying AVPlayer happily keeps
+  // playing inside the pool after the React component has unmounted. See
+  // `AudioWaveformViewImpl.tearDown()` for the full reset sequence.
+  [_impl tearDown];
   [super prepareForRecycle];
   static const auto defaultProps = std::make_shared<const AudioWaveformViewProps>();
   _props = defaultProps;

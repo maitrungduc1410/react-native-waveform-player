@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -94,6 +94,8 @@ export default function App() {
             containerBackgroundColor="#1E293B"
           />
         </Demo>
+
+        <UnmountDemo />
 
         <EventLogDemo />
       </ScrollView>
@@ -194,13 +196,82 @@ function SamplesDemo() {
   );
 }
 
+function UnmountDemo() {
+  const [mounted, setMounted] = useState(true);
+  const [playInBackground, setPlayInBackground] = useState(false);
+  // Bump a key whenever the user toggles options so the player re-mounts
+  // cleanly even if React would otherwise reuse the same fiber.
+  const [remountKey, setRemountKey] = useState(0);
+
+  // Sanity-check tap that fires inside the `useEffect` cleanup the same way
+  // a real consumer's cleanup would — useful for verifying that even an
+  // unmount-time imperative `pause()` doesn't silently leave audio running.
+  // (Spoiler: it shouldn't, because the native view tears itself down on
+  // recycle / detach.)
+  const playerRef = useRef<AudioWaveformViewRef>(null);
+  useEffect(() => {
+    // Capture the ref locally so React's exhaustive-deps lint doesn't warn
+    // about it changing between the effect body and its cleanup — and so
+    // we definitely use the same instance for the pause call.
+    const player = playerRef.current;
+    return () => {
+      player?.pause();
+    };
+  }, [mounted, remountKey]);
+
+  return (
+    <Demo title="8. Mount / unmount (regression: stop audio on unmount)">
+      <Text style={styles.subtle}>
+        Press play, then hit Unmount. Audio MUST stop immediately on both iOS
+        and Android, including with `playInBackground` enabled. This is the
+        canonical "audio keeps playing after the component unmounts" regression.
+      </Text>
+      <View style={styles.row}>
+        <Btn
+          label={mounted ? 'Unmount' : 'Mount'}
+          onPress={() => setMounted((m) => !m)}
+        />
+        <Btn
+          label="Remount"
+          onPress={() => {
+            setMounted(true);
+            setRemountKey((k) => k + 1);
+          }}
+        />
+        <Btn
+          label={`playInBackground: ${playInBackground ? 'on' : 'off'}`}
+          onPress={() => setPlayInBackground((p) => !p)}
+        />
+      </View>
+      <View style={styles.unmountSlot}>
+        {mounted ? (
+          <AudioWaveformView
+            key={`unmount-demo-${remountKey}-${playInBackground ? 'bg' : 'fg'}`}
+            ref={playerRef}
+            source={{ uri: REMOTE_AUDIO }}
+            style={styles.waveform}
+            containerBackgroundColor={playInBackground ? '#0EA5E9' : '#EC4899'}
+            playInBackground={playInBackground}
+          />
+        ) : (
+          <View style={[styles.waveform, styles.unmountPlaceholder]}>
+            <Text style={styles.unmountPlaceholderText}>
+              (player unmounted — audio should be silent)
+            </Text>
+          </View>
+        )}
+      </View>
+    </Demo>
+  );
+}
+
 function EventLogDemo() {
   const [lines, setLines] = useState<string[]>([]);
   const log = (entry: string) => {
     setLines((prev) => [entry, ...prev].slice(0, 6));
   };
   return (
-    <Demo title="8. Event log">
+    <Demo title="9. Event log">
       <AudioWaveformView
         source={{ uri: REMOTE_AUDIO }}
         style={styles.waveform}
@@ -327,5 +398,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Menlo',
     fontSize: 11,
     lineHeight: 16,
+  },
+  unmountSlot: {
+    marginTop: 10,
+  },
+  unmountPlaceholder: {
+    backgroundColor: '#E2E8F0',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unmountPlaceholderText: {
+    color: '#475569',
+    fontSize: 12,
+    fontStyle: 'italic',
   },
 });

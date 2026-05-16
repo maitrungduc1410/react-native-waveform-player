@@ -225,6 +225,11 @@ public final class AudioWaveformViewImpl: UIView {
         if let token = didBecomeActiveObserver {
             NotificationCenter.default.removeObserver(token)
         }
+        // Fabric pools `AudioWaveformView`s so this `deinit` only fires when
+        // the pool evicts the view — but `tearDown()` is idempotent and
+        // guarantees the engine is stopped even if the .mm shim somehow
+        // bypassed `prepareForRecycle`.
+        tearDown()
     }
 
     private func commonInit() {
@@ -784,6 +789,46 @@ public final class AudioWaveformViewImpl: UIView {
     public func setSpeedValue(_ value: Float) {
         if controlledSpeed >= 0 { return }
         applyEffectiveSpeed(value)
+    }
+
+    // MARK: - Teardown
+
+    /// Stop playback and release every audio / decode / display-link
+    /// resource the view is holding. Called when the React component
+    /// unmounts so the underlying `AVPlayer` doesn't keep playing inside
+    /// the Fabric view-recycler pool (see `AudioWaveformView.mm`'s
+    /// `prepareForRecycle`). Also called from `deinit` so it's safe even
+    /// if the pool releases the view directly.
+    ///
+    /// Idempotent: every step guards against the "already torn down"
+    /// state, so calling this twice in a row is a no-op.
+    public func tearDown() {
+        // Setting `sourceURI` back to `""` runs through `applySource()`,
+        // which already does the heavy lifting: cancels the decoder,
+        // resets the engine (pauses + replaces the AVPlayerItem with
+        // nil + tears down KVO/time observers), and stops the display
+        // link. Doing it via the setter also clears the cached previous
+        // value so the next mount (which may reuse the same URI from
+        // the recycler pool) re-applies the source instead of being
+        // short-circuited by the `oldValue == newValue` guard.
+        sourceURI = ""
+        providedSamples = nil
+
+        // Reset the rest of the bookkeeping state so a recycled view
+        // wakes up indistinguishable from a freshly-allocated one.
+        internalPlaying = false
+        internalSpeed = 1.0
+        defaultSpeedApplied = false
+        initialPositionApplied = false
+        pendingScrubMs = nil
+        isScrubbing = false
+        resumeAfterScrub = false
+        amplitudes = []
+        barsView.amplitudes = []
+        barsView.progressFraction = 0
+        timeLabel.text = "0:00"
+        playButton.isPlaying = false
+        playButton.isLoading = false
     }
 
     // MARK: - Display link (~30 Hz repaint while playing or scrubbing)
