@@ -121,6 +121,18 @@ final class AudioPlayerEngine {
         state = .loading
         currentMs = 0
         durationMs = 0
+        isPlaying = false
+
+        // `AVPlayer.rate` is independent of the current item and survives
+        // `replaceCurrentItem(with:)` — so if the previous item was playing
+        // (rate=1.0) and we don't pause here, the new item auto-resumes the
+        // moment its status flips to `.readyToPlay` (because we also set
+        // `automaticallyWaitsToMinimizeStalling = false`). That manifests
+        // as "audio plays on its own after a mount / unmount / remount cycle,
+        // and the play button still shows the play icon" because engine
+        // bookkeeping says `isPlaying = false` but AVPlayer is happily
+        // playing the new item at the leftover rate.
+        player.pause()
 
         let item = AVPlayerItem(url: url)
         currentItem = item
@@ -233,11 +245,18 @@ final class AudioPlayerEngine {
     func reset() {
         pendingStart = false
         teardownObservers()
+        // Pause BEFORE dropping the current item — otherwise `player.rate`
+        // (which AVPlayer treats as orthogonal to the current item) sticks
+        // at whatever it was last set to and silently kicks the next item
+        // into playback the moment it becomes ready. See `setSource(url:)`
+        // for the long version.
+        player.pause()
         player.replaceCurrentItem(with: nil)
         currentItem = nil
         isPlaying = false
         currentMs = 0
         durationMs = 0
+        rate = 1.0
         state = .idle
     }
 

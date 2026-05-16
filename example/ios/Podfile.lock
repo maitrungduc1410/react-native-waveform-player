@@ -1,5 +1,5 @@
 PODS:
-  - AudioWaveform (1.0.1):
+  - AudioWaveform (1.0.2):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2000,7 +2000,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AudioWaveform: 65d05636da16be1c9d27316fce265762e42cfbb1
+  AudioWaveform: 4ec4a59d8169572fb05a940b775f213f062bf9ed
   FBLazyVector: c00c20551d40126351a6783c47ce75f5b374851b
   hermes-engine: 6047d077286eed076fac0e7a72df3c33df98b742
   RCTDeprecation: 3bb167081b134461cfeb875ff7ae1945f8635257
@@ -2077,4 +2077,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: cf4c985056ecbdfe10e48f65db3b567431c48bcb
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

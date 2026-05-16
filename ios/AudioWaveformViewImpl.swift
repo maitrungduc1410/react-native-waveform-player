@@ -829,6 +829,10 @@ public final class AudioWaveformViewImpl: UIView {
         timeLabel.text = "0:00"
         playButton.isPlaying = false
         playButton.isLoading = false
+        // Match the `internalSpeed = 1.0` reset above so the pill doesn't
+        // briefly flash a stale "2.0x" before the new mount's defaultSpeed
+        // prop setter (if any) re-applies the right value.
+        speedPill.setSpeed(1.0)
     }
 
     // MARK: - Display link (~30 Hz repaint while playing or scrubbing)

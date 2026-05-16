@@ -1,6 +1,6 @@
 {
   "name": "react-native-waveform-player",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native React Native voice-note UI: audio player + animated waveform with scrub, speed control, and background playback. Fabric, Swift + Kotlin.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
