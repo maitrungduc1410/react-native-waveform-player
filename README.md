@@ -274,6 +274,17 @@ type AudioWaveformViewRef = {
 };
 ```
 
+## Architecture
+
+Curious how it works under the hood, or hacking on the library itself?
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — codegen pipeline, audio engine
+  + decoder + bars view subsystems, the loading sequence, where state
+  lives.
+- [LESSONS_LEARNED.md](./LESSONS_LEARNED.md) — field journal of the
+  bugs we hit and what we'd do differently. Skim it before debugging
+  anything weird; there's a decent chance someone's already been there.
+
 ## Out of scope
 
 - Recording (playback + visualisation only).
@@ -285,6 +296,7 @@ type AudioWaveformViewRef = {
 
 - [Development workflow](CONTRIBUTING.md#development-workflow)
 - [Sending a pull request](CONTRIBUTING.md#sending-a-pull-request)
+- [Agent / contributor guide](AGENTS.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
 
 ## License
