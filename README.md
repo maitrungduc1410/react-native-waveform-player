@@ -4,6 +4,9 @@ Native audio-message UI for React Native — play any local or remote audio file
 and render its waveform purely natively. Swift on iOS, Kotlin on Android,
 Fabric (new architecture) only.
 
+Works with both bare React Native and **Expo** (via a
+[development build](#expo) — it ships native code so it can't run in Expo Go).
+
 <p align="center">
   <img src="./demo/ios.png" alt="iOS" width="48%" />
   <img src="./demo/android.png" alt="Android" width="48%" />
@@ -45,6 +48,52 @@ cd ios && pod install
 
 This library is Fabric-only; the host app must have the new architecture
 enabled (it's the default in RN 0.85+).
+
+### Expo
+
+The library is autolinked, so it works in any Expo app that uses a
+[development build](https://docs.expo.dev/develop/development-builds/introduction/).
+It contains native code, so it **cannot** run in **Expo Go** — you need a dev
+build (or EAS Build). New architecture is on by default in Expo SDK 52+, which
+is what this library requires.
+
+```sh
+npx expo install react-native-waveform-player
+```
+
+Then generate the native projects and run a dev build:
+
+```sh
+npx expo prebuild
+npx expo run:ios
+npx expo run:android
+```
+
+Because `expo prebuild` regenerates the `ios/` and `android/` folders, don't
+edit `Info.plist` / `AndroidManifest.xml` by hand for the
+[background-playback](#background-playback) feature — configure it in
+`app.json` / `app.config.js` instead so it survives regeneration:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
+    },
+    "android": {
+      "permissions": ["android.permission.WAKE_LOCK"]
+    }
+  }
+}
+```
+
+Both entries are only needed if you use `playInBackground`. The iOS
+`UIBackgroundModes` enables true background audio; the Android `WAKE_LOCK`
+permission lets playback survive device sleep (otherwise it's silently
+skipped — see [Background playback](#background-playback)). Re-run
+`npx expo prebuild` (or your next `eas build`) after changing these.
 
 ## Usage
 
@@ -176,6 +225,9 @@ Enable the **Audio** background mode on the host app target. Either:
    </array>
    ```
 
+   On **Expo**, don't edit `Info.plist` directly (prebuild overwrites it) —
+   set `ios.infoPlist.UIBackgroundModes` in `app.json` instead. See [Expo](#expo).
+
 The library configures `AVAudioSession` to `.playback` and activates it for
 you. Note that this will play through the silent-mode switch and interrupt
 other apps' audio (Spotify, etc.) by default. If your app already manages
@@ -193,6 +245,9 @@ suspended), add `WAKE_LOCK` to your **app's** `AndroidManifest.xml`:
 ```xml
 <uses-permission android:name="android.permission.WAKE_LOCK" />
 ```
+
+On **Expo**, add it via `android.permissions` in `app.json` rather than
+editing the manifest by hand (prebuild regenerates it). See [Expo](#expo).
 
 The library will then automatically call `MediaPlayer.setWakeMode` when
 `playInBackground` is `true`. Without the permission `setWakeMode` is
