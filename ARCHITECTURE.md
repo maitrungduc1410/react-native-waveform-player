@@ -59,6 +59,7 @@ view glues them together.
 | `AudioWaveformViewNativeComponent.ts` | Codegen spec — declares props, events, commands. **Source of truth** for the JS↔native interface. |
 | `AudioWaveformView.native.tsx` | Public component (`.native.tsx` resolution → loaded on iOS/Android). `forwardRef`, controlled-prop translation, ref imperative API, JS-side event unwrapping. |
 | `AudioWaveformView.tsx` | Web/Node fallback that throws on render. Exists so importing the package on non-native platforms doesn't break type-checking. |
+| `types.ts` | Public types (props, events, ref) with their TSDoc. Both component files import from here; the API reference is generated from it. |
 | `index.tsx` | Public exports. |
 
 ### iOS (`ios/`)
@@ -431,26 +432,26 @@ Fix: `AudioWaveformView.mm` overrides `prepareForRecycle` and calls
 ### A new prop
 
 1. Add it to `src/AudioWaveformViewNativeComponent.ts` (use `WithDefault<...>` if it has a default).
-2. Surface a public type on `AudioWaveformViewProps` in `src/AudioWaveformView.native.tsx` (and the non-native stub for type parity).
+2. Add it to `AudioWaveformViewProps` in `src/types.ts`, with TSDoc.
 3. **iOS**: add a stored property on `AudioWaveformViewImpl` (with `didSet` if it triggers UI work), then wire it in `AudioWaveformView.mm`'s `updateProps`.
 4. **Android**: add a property on `AudioWaveformView.kt` (with the appropriate setter behaviour), then add `override fun set<Name>(...)` on `AudioWaveformViewManager.kt`.
-5. Update the props table in `README.md`.
+5. Document it in `docs/guide/props.md` (and the `vi` / `zh` copies).
 
 ### A new event
 
 1. Add the payload type + `DirectEventHandler<...>` in the codegen spec.
-2. Add the public TS callback type in `AudioWaveformView.native.tsx` and unwrap `nativeEvent` in `AudioWaveformViewInner`.
+2. Add the payload type and the callback prop, with TSDoc, in `src/types.ts`, then unwrap `nativeEvent` in `AudioWaveformViewInner` (`AudioWaveformView.native.tsx`).
 3. **iOS**: add an `@objc` callback property on `AudioWaveformViewImpl` and an `emitOn<Name>` helper in `AudioWaveformView.mm` that calls `typedEventEmitter()->onWhatever(...)`.
 4. **Android**: add a callback closure on `AudioWaveformView.kt` and dispatch via `UIManagerHelper.getEventDispatcherForReactTag(...)` in `AudioWaveformViewManager.wireEvents`.
-5. Document it in `README.md` (events table).
+5. Document it in `docs/guide/events.md` (and the `vi` / `zh` copies).
 
 ### A new command
 
 1. Add it to `NativeCommands` + the `supportedCommands` list in the codegen spec.
-2. Add a method on `AudioWaveformViewRef` and wire it in the `useImperativeHandle` hook.
+2. Add a method, with TSDoc, on `AudioWaveformViewRef` in `src/types.ts` and wire it in the `useImperativeHandle` hook.
 3. **iOS**: add a `public func` on `AudioWaveformViewImpl` and dispatch from `handleCommand:` in the `.mm`.
 4. **Android**: add a `fun` on `AudioWaveformView.kt` and an `override` on `AudioWaveformViewManager`.
-5. Document it on the `AudioWaveformViewRef` type in `README.md`.
+5. Document it in `docs/guide/ref-methods.md` (and the `vi` / `zh` copies).
 
 ## Out-of-scope, for the avoidance of doubt
 

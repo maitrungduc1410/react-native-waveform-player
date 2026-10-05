@@ -23,8 +23,9 @@ Public component: `<AudioWaveformView />` from `react-native-waveform-player`.
 2. [LESSONS_LEARNED.md](./LESSONS_LEARNED.md) — bugs we hit and what we
    learned. Many of them have subtle traps you'd reintroduce if you don't
    know about them.
-3. [README.md](./README.md) — public API surface (props, events, ref
-   methods).
+3. The docs site in [`docs/`](./docs): public API surface (props,
+   events, ref methods) in `docs/guide/props.md`, `events.md` and
+   `ref-methods.md`. The README is a short overview that links there.
 4. [CONTRIBUTING.md](./CONTRIBUTING.md) — dev workflow specifics
    (running the example app, opening native projects in Xcode / Android
    Studio).
@@ -35,12 +36,14 @@ Public component: `<AudioWaveformView />` from `react-native-waveform-player`.
 src/                     ← JS / TS layer
   AudioWaveformViewNativeComponent.ts   ← codegen spec (source of truth)
   AudioWaveformView.native.tsx          ← public component, native side
-  AudioWaveformView.tsx                 ← non-native stub (type parity)
+  AudioWaveformView.tsx                 ← non-native stub (throws)
+  types.ts                              ← public types + TSDoc (single source)
   index.tsx                             ← public exports
 ios/                     ← Swift + Obj-C++
 android/src/main/...     ← Kotlin
 example/                 ← Yarn workspace; example app for manual testing
-demo/                    ← screenshots used in the README
+docs/                    ← Yarn workspace; VitePress + TypeDoc docs site
+demo/                    ← screenshots used in the README and the docs
 ```
 
 ## Commands you will need
@@ -57,6 +60,8 @@ All commands are Yarn. Node `>= 22.11.0` (see `.nvmrc`).
 | `yarn example ios` | Run the example on iOS (you must `cd example/ios && pod install` first if native code changed). |
 | `yarn example android` | Run the example on Android. |
 | `yarn clean` | Wipe all build artefacts (`lib/`, native build dirs). |
+| `yarn docs:dev` | Docs site dev server (regenerates the API reference first). |
+| `yarn docs:build` | Build the docs site to `docs/.vitepress/dist`. Fails on dead links. |
 
 `pre-commit` (via `lefthook`) runs `eslint` on staged JS/TS files and
 `tsc` over the whole project, plus `commitlint` on the message.
@@ -103,9 +108,9 @@ for the full "add a prop / event / command" walkthroughs.
 
 | You want to… | Touch these files |
 |---|---|
-| Add a prop | `src/AudioWaveformViewNativeComponent.ts`, `src/AudioWaveformView.native.tsx` (+ `.tsx` stub for type parity), `ios/AudioWaveformViewImpl.swift`, `ios/AudioWaveformView.mm` (`updateProps`), `android/.../AudioWaveformView.kt`, `android/.../AudioWaveformViewManager.kt`, `README.md` props table |
-| Add an event | codegen spec (payload + `DirectEventHandler`), `AudioWaveformView.native.tsx` (typed callback + unwrap), `ios/AudioWaveformView.mm` (`emitOn*`), `ios/AudioWaveformViewImpl.swift` (the closure), `android/.../AudioWaveformView.kt` (the closure), `android/.../AudioWaveformViewManager.kt` (`wireEvents`), `README.md` events table |
-| Add a command | codegen spec (`NativeCommands` + `supportedCommands`), `AudioWaveformView.native.tsx` (`useImperativeHandle`), `ios/AudioWaveformView.mm` (`handleCommand:`), `ios/AudioWaveformViewImpl.swift` (the impl), `android/.../AudioWaveformView.kt` + `…ViewManager.kt`, `README.md` ref API |
+| Add a prop | `src/AudioWaveformViewNativeComponent.ts`, `src/types.ts` (`AudioWaveformViewProps` + TSDoc), `src/AudioWaveformView.native.tsx`, `ios/AudioWaveformViewImpl.swift`, `ios/AudioWaveformView.mm` (`updateProps`), `android/.../AudioWaveformView.kt`, `android/.../AudioWaveformViewManager.kt`, `docs/guide/props.md` (en, vi, zh) |
+| Add an event | codegen spec (payload + `DirectEventHandler`), `src/types.ts` (payload type, callback prop + TSDoc), `AudioWaveformView.native.tsx` (unwrap), `ios/AudioWaveformView.mm` (`emitOn*`), `ios/AudioWaveformViewImpl.swift` (the closure), `android/.../AudioWaveformView.kt` (the closure), `android/.../AudioWaveformViewManager.kt` (`wireEvents`), `docs/guide/events.md` (en, vi, zh) |
+| Add a command | codegen spec (`NativeCommands` + `supportedCommands`), `AudioWaveformView.native.tsx` (`useImperativeHandle`), `ios/AudioWaveformView.mm` (`handleCommand:`), `ios/AudioWaveformViewImpl.swift` (the impl), `android/.../AudioWaveformView.kt` + `…ViewManager.kt`, `AudioWaveformViewRef` + TSDoc in `src/types.ts`, `docs/guide/ref-methods.md` (en, vi, zh) |
 | Change audio behaviour (state, play/pause, seek, rate) | `ios/AudioPlayerEngine.swift` and `android/.../AudioPlayerEngine.kt`. Keep the two in lockstep. |
 | Change waveform decoding | `ios/WaveformDecoder.swift` and `android/.../WaveformDecoder.kt`. Both emit progressive partials in the same shape. |
 | Change bar rendering | `ios/WaveformBarsView.swift` and `android/.../WaveformBarsView.kt`. |
@@ -178,6 +183,25 @@ For any change beyond a doc edit:
 
 There is currently **no automated test suite**. Manual testing in the
 example app is the canonical "did this regress anything" check.
+
+## Documentation site
+
+`docs/` is a VitePress site published to GitHub Pages by
+`.github/workflows/docs.yml` on every push to `master`, at
+https://maitrungduc1410.github.io/react-native-waveform-player/.
+
+- Guide pages live in `docs/guide/` (English), `docs/vi/guide/` and
+  `docs/zh/guide/`. Keep the three locales in step: same pages, same
+  headings with the English `{#slug}` ids, so links and anchors match.
+- `docs/api/` is generated by TypeDoc from `src/index.tsx` and is
+  gitignored. Public types live in `src/types.ts`, so the TSDoc comments
+  there are what the API reference shows. Write defaults inline ("Defaults to `x`."), because
+  the generated tables drop `@defaultValue`.
+- The browser playground (`docs/.vitepress/theme/components/`) is a web
+  approximation of the native view. If you change the layout, defaults
+  or behaviour natively, update it too.
+- Every claim in the guide should match the native code. When a
+  behaviour changes, search the guide for it in all three locales.
 
 ## When you get stuck
 

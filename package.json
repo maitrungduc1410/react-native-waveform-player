@@ -36,7 +36,10 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\""
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "docs:dev": "yarn workspace react-native-waveform-player-docs dev",
+    "docs:build": "yarn workspace react-native-waveform-player-docs build",
+    "docs:preview": "yarn workspace react-native-waveform-player-docs preview"
   },
   "keywords": [
     "react-native",
@@ -64,7 +67,7 @@
   "bugs": {
     "url": "https://github.com/maitrungduc1410/react-native-waveform-player/issues"
   },
-  "homepage": "https://github.com/maitrungduc1410/react-native-waveform-player#readme",
+  "homepage": "https://maitrungduc1410.github.io/react-native-waveform-player/",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -95,7 +98,8 @@
     "react-native": "*"
   },
   "workspaces": [
-    "example"
+    "example",
+    "docs"
   ],
   "packageManager": "yarn@4.11.0",
   "react-native-builder-bob": {

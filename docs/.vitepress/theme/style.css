@@ -1,0 +1,125 @@
+/*
+ * Identity: fuchsia #D946EF shading to pink #DB2777.
+ * Contrast (WCAG AA, 4.5:1 for text):
+ * - light: links #A21CAF are 6.3:1 on white; buttons #C026D3 with white text 4.7:1.
+ * - dark: links #E879F9 are 7.0:1 on #1b1b1f; buttons #D946EF need dark text
+ *   (5.0:1), white would only be 3.5:1.
+ */
+:root {
+  --rnwp-identity: #d946ef;
+  --rnwp-identity-2: #db2777;
+
+  --vp-c-brand-1: #a21caf;
+  --vp-c-brand-2: #86198f;
+  --vp-c-brand-3: #c026d3;
+  --vp-c-brand-soft: rgba(217, 70, 239, 0.14);
+
+  --vp-button-brand-text: #ffffff;
+  --vp-button-brand-bg: #c026d3;
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-hover-text: #ffffff;
+  --vp-button-brand-hover-bg: #a21caf;
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-active-text: #ffffff;
+  --vp-button-brand-active-bg: #86198f;
+  --vp-button-brand-active-border: transparent;
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #a21caf 25%, #db2777);
+  --vp-home-hero-image-background-image: radial-gradient(
+    closest-side,
+    rgba(217, 70, 239, 0.3),
+    rgba(219, 39, 119, 0.12) 55%,
+    transparent
+  );
+  --vp-home-hero-image-filter: blur(28px);
+}
+
+.dark {
+  --vp-c-brand-1: #e879f9;
+  --vp-c-brand-2: #f0abfc;
+  --vp-c-brand-3: #d946ef;
+  --vp-c-brand-soft: rgba(232, 121, 249, 0.16);
+
+  --vp-button-brand-text: #1b1b1f;
+  --vp-button-brand-bg: #d946ef;
+  --vp-button-brand-hover-text: #1b1b1f;
+  --vp-button-brand-hover-bg: #e879f9;
+  --vp-button-brand-active-text: #1b1b1f;
+  --vp-button-brand-active-bg: #c026d3;
+
+  --vp-home-hero-name-background: linear-gradient(120deg, #e879f9 25%, #f472b6);
+  --vp-home-hero-image-background-image: radial-gradient(
+    closest-side,
+    rgba(217, 70, 239, 0.3),
+    rgba(219, 39, 119, 0.12) 55%,
+    transparent
+  );
+}
+
+.home-section {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 48px 24px 0;
+}
+
+.home-section h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.home-section > p {
+  color: var(--vp-c-text-2);
+}
+
+.home-section .vp-doc div[class*='language-'] {
+  margin: 16px 0;
+}
+
+.demo-shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.demo-shots figure {
+  margin: 0;
+  text-align: center;
+}
+
+.demo-shots img {
+  width: 300px;
+  max-width: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--vp-c-divider);
+}
+
+.demo-shots figcaption {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+}
+
+/* VPNavBar sets white-space: nowrap; long site titles must wrap inside the title area instead of overflowing. */
+.VPNavBar .container > .title {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.VPNavBarTitle .title {
+  min-width: 0;
+}
+
+.VPNavBarTitle .title > span {
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.VPNavBarTitle .logo {
+  flex-shrink: 0;
+}

@@ -1,13 +1,13 @@
 export { AudioWaveformView } from './AudioWaveformView';
 export type {
-  AudioWaveformViewProps,
-  AudioWaveformViewRef,
   AudioWaveformPlayerState,
+  AudioWaveformTimeMode,
+  AudioWaveformSource,
   AudioWaveformPlayerStateEvent,
   AudioWaveformTimeUpdateEvent,
   AudioWaveformSeekEvent,
   AudioWaveformLoadEvent,
   AudioWaveformLoadErrorEvent,
-  AudioWaveformTimeMode,
-  AudioWaveformSource,
-} from './AudioWaveformView';
+  AudioWaveformViewProps,
+  AudioWaveformViewRef,
+} from './types';
