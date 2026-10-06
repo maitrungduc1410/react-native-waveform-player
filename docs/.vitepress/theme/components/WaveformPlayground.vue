@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useData } from 'vitepress';
 import { computed, reactive, ref } from 'vue';
+import CodeBlock from './CodeBlock.vue';
 import WaveformPreview from './WaveformPreview.vue';
 
 const props = withDefaults(
@@ -27,8 +28,6 @@ const strings = {
     opacity: 'opacity',
     auto: 'auto',
     reload: 'Reload source',
-    copy: 'Copy',
-    copied: 'Copied',
     events: 'Events',
     clear: 'Clear',
     empty: 'Play, scrub or tap the speed pill to see events.',
@@ -49,8 +48,6 @@ const strings = {
     opacity: 'độ mờ',
     auto: 'tự động',
     reload: 'Tải lại nguồn',
-    copy: 'Sao chép',
-    copied: 'Đã chép',
     events: 'Sự kiện',
     clear: 'Xóa',
     empty: 'Hãy phát, tua hoặc chạm vào nút tốc độ để xem sự kiện.',
@@ -71,8 +68,6 @@ const strings = {
     opacity: '不透明度',
     auto: '自动',
     reload: '重新加载音频',
-    copy: '复制',
-    copied: '已复制',
     events: '事件',
     clear: '清空',
     empty: '播放、拖动进度或点击倍速按钮，即可在这里看到事件。',
@@ -277,17 +272,6 @@ const code = computed(() => {
   return `<AudioWaveformView\n${lines.join('\n')}\n/>`;
 });
 
-const copied = ref(false);
-async function copy() {
-  try {
-    await navigator.clipboard.writeText(code.value);
-    copied.value = true;
-    setTimeout(() => (copied.value = false), 1500);
-  } catch {
-    copied.value = false;
-  }
-}
-
 const player = ref<InstanceType<typeof WaveformPreview>>();
 const previewKey = ref(0);
 
@@ -452,10 +436,7 @@ function reload() {
         </fieldset>
       </div>
 
-      <div class="wp-code">
-        <button type="button" class="wp-copy" @click="copy">{{ copied ? t.copied : t.copy }}</button>
-        <pre><code>{{ code }}</code></pre>
-      </div>
+      <CodeBlock :code="code" />
     </template>
   </div>
 </template>
@@ -622,33 +603,6 @@ fieldset code {
   flex: 1 1 100%;
   color: var(--vp-c-text-2);
   font-size: 12px;
-}
-
-.wp-code {
-  position: relative;
-  margin-top: 16px;
-  border-radius: 8px;
-  background: var(--vp-code-block-bg);
-}
-
-.wp-code pre {
-  margin: 0;
-  padding: 16px;
-  overflow-x: auto;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.wp-code pre code {
-  padding: 0;
-  background: transparent;
-  color: var(--vp-code-block-color);
-}
-
-.wp-copy {
-  position: absolute;
-  top: 8px;
-  right: 8px;
 }
 
 .wp-events {
