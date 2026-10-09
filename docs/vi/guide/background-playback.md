@@ -39,16 +39,18 @@ Nếu thiếu, iOS sẽ tạm ngưng app ngay sau khi app xuống nền và âm 
 
 ### Thư viện làm gì với AVAudioSession {#what-the-library-does-with-avaudiosession}
 
-Khi `playInBackground` chuyển thành `true`, thư viện cấu hình `AVAudioSession` dùng chung:
+Khi bắt đầu phát mà `playInBackground` (hoặc `ignoreSilentSwitch`) đang bật, thư viện cấu hình `AVAudioSession` dùng chung:
 
 - Nếu category đã là `.playback` hoặc `.playAndRecord`, thư viện chỉ kích hoạt session.
 - Nếu không, thư viện đặt category thành `.playback` (mode mặc định, không có option) rồi kích hoạt.
 
 Category `.playback` vẫn phát kể cả khi bật công tắc im lặng, và nó ngắt âm thanh của các app khác, chẳng hạn app nghe nhạc. Nếu bạn cần hành vi khác, ví dụ phát trộn với âm thanh khác, hãy tự đặt category thành `.playback` hoặc `.playAndRecord` với các option của bạn trước khi component được mount. Thư viện sẽ giữ nguyên cấu hình đó.
 
+Session được cấu hình khi bắt đầu phát, không phải khi component được mount, nên việc render một player không ngắt âm thanh của app khác cho đến khi người dùng bấm phát.
+
 Đặt `playInBackground` về lại `false` không khôi phục category trước đó.
 
-Khi `playInBackground` là `false`, thư viện hoàn toàn không động đến `AVAudioSession`. Xem [Không có tiếng trên iPhone ở chế độ im lặng](/vi/guide/troubleshooting#no-sound-in-silent-mode) để hiểu điều này có nghĩa gì.
+Khi cả `playInBackground` và `ignoreSilentSwitch` đều là `false`, thư viện hoàn toàn không động đến `AVAudioSession`. Xem [Không có tiếng trên iPhone ở chế độ im lặng](/vi/guide/troubleshooting#no-sound-in-silent-mode) để hiểu điều này có nghĩa gì.
 
 ## Thiết lập cho Android {#android-setup}
 

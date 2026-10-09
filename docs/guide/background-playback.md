@@ -39,16 +39,18 @@ Without it, iOS suspends the app shortly after it goes to the background and the
 
 ### What the library does with AVAudioSession
 
-When `playInBackground` becomes `true`, the library configures the shared `AVAudioSession`:
+When playback starts with `playInBackground` (or `ignoreSilentSwitch`) on, the library configures the shared `AVAudioSession`:
 
 - If the category is already `.playback` or `.playAndRecord`, it only activates the session.
 - Otherwise it sets the category to `.playback` (default mode, no options) and activates it.
 
 The `.playback` category plays even when the silent switch is on, and it interrupts audio from other apps, such as a music app. If you need different behavior, for example mixing with other audio, set the category yourself to `.playback` or `.playAndRecord` with your options before the component mounts. The library keeps it.
 
+The session is configured when playback starts, not when the component mounts, so rendering a player does not interrupt other apps' audio until the user presses play.
+
 Setting `playInBackground` back to `false` does not restore the previous category.
 
-When `playInBackground` is `false`, the library does not touch `AVAudioSession` at all. See [No sound on iPhone in silent mode](/guide/troubleshooting#no-sound-in-silent-mode) for what that means.
+When both `playInBackground` and `ignoreSilentSwitch` are `false`, the library does not touch `AVAudioSession` at all. See [No sound on iPhone in silent mode](/guide/troubleshooting#no-sound-in-silent-mode) for what that means.
 
 ## Android setup
 

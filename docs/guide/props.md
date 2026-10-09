@@ -83,6 +83,7 @@ How the pill picks the next speed, and how `defaultSpeed` interacts with `setSpe
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `playInBackground` | `boolean` | `false` | Keep playing when the app goes to the background. Needs setup on iOS. |
+| `ignoreSilentSwitch` | `boolean` | `false` | iOS only. Play even when the Ring / Silent switch is on, by switching the audio session to `.playback` when playback starts. |
 | `pauseUiUpdatesInBackground` | `boolean` | `true` | Skip bar and time label refreshes while in the background. `onTimeUpdate` keeps firing. |
 
 See [Background playback](/guide/background-playback) for the required iOS capability, the optional Android `WAKE_LOCK` permission and Expo config.

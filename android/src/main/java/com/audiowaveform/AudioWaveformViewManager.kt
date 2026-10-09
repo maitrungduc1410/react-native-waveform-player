@@ -186,6 +186,10 @@ class AudioWaveformViewManager(@Suppress("UNUSED_PARAMETER") context: ReactAppli
         view.playInBackground = value
     }
 
+    // iOS only. Android's ringer mode doesn't mute the media stream, so there
+    // is nothing to opt out of.
+    override fun setIgnoreSilentSwitch(view: AudioWaveformView, value: Boolean) = Unit
+
     override fun setPauseUiUpdatesInBackground(view: AudioWaveformView, value: Boolean) {
         view.pauseUiUpdatesInBackground = value
     }

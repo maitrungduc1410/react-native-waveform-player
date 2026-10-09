@@ -83,6 +83,7 @@ description: "AudioWaveformView 全部 props 的类型与默认值：音频源�
 | Prop | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `playInBackground` | `boolean` | `false` | 应用进入后台时继续播放。iOS 上需要额外配置。 |
+| `ignoreSilentSwitch` | `boolean` | `false` | 仅 iOS。在开始播放时把 audio session 切换为 `.playback`，使响铃 / 静音开关打开时仍能发声。 |
 | `pauseUiUpdatesInBackground` | `boolean` | `true` | 在后台时跳过波形条和时间标签的刷新。`onTimeUpdate` 仍会继续触发。 |
 
 iOS 必需的 capability、Android 可选的 `WAKE_LOCK` 权限以及 Expo 配置，见[后台播放](/zh/guide/background-playback)。

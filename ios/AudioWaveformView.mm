@@ -251,6 +251,9 @@ using namespace facebook::react;
   if (oldViewProps.playInBackground != newViewProps.playInBackground) {
     _impl.playInBackground = newViewProps.playInBackground;
   }
+  if (oldViewProps.ignoreSilentSwitch != newViewProps.ignoreSilentSwitch) {
+    _impl.ignoreSilentSwitch = newViewProps.ignoreSilentSwitch;
+  }
   if (oldViewProps.pauseUiUpdatesInBackground != newViewProps.pauseUiUpdatesInBackground) {
     _impl.pauseUiUpdatesInBackground = newViewProps.pauseUiUpdatesInBackground;
   }

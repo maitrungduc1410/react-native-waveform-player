@@ -68,7 +68,7 @@ Chi tiết xem ở [Phát trong nền](/vi/guide/background-playback).
 
 ## Audio focus và các app khác {#audio-focus-and-other-apps}
 
-- **iOS:** với `playInBackground`, session `.playback` sẽ ngắt âm thanh của các app khác. Nếu không bật, thư viện để nguyên session và category của app bạn được áp dụng. Với category mặc định của iOS (`soloAmbient`), công tắc im lặng sẽ tắt tiếng khi phát.
+- **iOS:** với `playInBackground` hoặc `ignoreSilentSwitch`, session `.playback` sẽ ngắt âm thanh của các app khác khi bắt đầu phát. Nếu không bật, thư viện để nguyên session và category của app bạn được áp dụng. Với category mặc định của iOS (`soloAmbient`), công tắc im lặng sẽ tắt tiếng khi phát.
 - **Android:** thư viện không yêu cầu audio focus, nên các app khác không được yêu cầu tạm dừng hay giảm âm lượng khi một tin nhắn thoại bắt đầu phát.
 
 ## seekTo() khi đang dừng {#seekto-while-paused}

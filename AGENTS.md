@@ -96,10 +96,12 @@ All commands are Yarn. Node `>= 22.11.0` (see `.nvmrc`).
   `react-native-svg` / etc. Custom gestures and drawing are native.
 - **Don't move the codegen spec** out of `src/AudioWaveformViewNativeComponent.ts`. RN's codegen relies on the path + file naming.
 - **Don't deep-import codegen types** from
-  `react-native/Libraries/...`. Use
-  `import { type CodegenTypes } from 'react-native'` and qualified
-  names (`CodegenTypes.Int32`, `CodegenTypes.WithDefault`, etc.). See
-  Lesson #1.
+  `react-native/Libraries/...`, and don't use qualified
+  `CodegenTypes.X` names in the spec either. Import the bare names
+  (`Int32`, `Float`, `WithDefault`, `DirectEventHandler`) from
+  `src/codegenTypes.ts`, which aliases them off the `CodegenTypes`
+  namespace. That keeps `tsc` on the strict-api surface and keeps
+  codegen working on RN < 0.80. See Lessons #1 and #23.
 
 ## Where to make changes
 
@@ -136,8 +138,11 @@ for the full "add a prop / event / command" walkthroughs.
   network task) to `AudioWaveformViewImpl`, also reset it in `tearDown()`
   ([Lesson #11](./LESSONS_LEARNED.md)).
 - **Codegen `customConditions`.** Keep the strict-api flag in
-  `tsconfig.json` and import codegen types via the namespace surface
-  ([Lesson #1](./LESSONS_LEARNED.md)).
+  `tsconfig.json` and import codegen types through `src/codegenTypes.ts`
+  ([Lessons #1 and #23](./LESSONS_LEARNED.md)).
+- **`AVAudioSession` is touched at play time only.** Never configure or
+  activate it from a prop setter or on mount; that interrupts other
+  apps' audio just by rendering a player ([Lesson #24](./LESSONS_LEARNED.md)).
 - **AVPlayer + URLSession are bandwidth rivals.** Don't kick off the
   waveform decoder in parallel with the engine's initial fetch — defer
   it to `engine.onLoad` ([Lesson #6](./LESSONS_LEARNED.md)).
@@ -145,13 +150,13 @@ for the full "add a prop / event / command" walkthroughs.
 ## Before you start coding — scan LESSONS_LEARNED
 
 This is the single most important habit for this repo.
-[LESSONS_LEARNED.md](./LESSONS_LEARNED.md) has 21 numbered entries
+[LESSONS_LEARNED.md](./LESSONS_LEARNED.md) has 24 numbered entries
 describing the exact bugs we hit and how we fixed them. **Before you
 modify any subsystem, do a quick keyword search in that file** for
 the area you're touching:
 
-- Touching codegen / TS types → check entries 1–3.
-- Touching iOS playback / loading / gestures → check 4–12.
+- Touching codegen / TS types → check entries 1–3 and 23.
+- Touching iOS playback / loading / gestures / audio session → check 4–12 and 24.
 - Touching Android playback / lifecycle / gestures → check 13–17.
 - Touching UX (controlled mode, loading state, background) → 18–21.
 

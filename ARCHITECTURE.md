@@ -180,7 +180,9 @@ idle ─────────────► loading
 Public surface:
 
 - **State**: `state`, `durationMs`, `currentMs`, `isPlaying`, `rate`.
-- **Config**: `loop`, `setBackgroundPlaybackEnabled(...)`.
+- **Config**: `loop`, `configuresPlaybackSession` (set by the view from
+  `playInBackground || ignoreSilentSwitch`; the session itself is
+  configured in `startPlaybackInternal()`).
 - **Mutation**: `setSource`, `play`, `pause`, `toggle`, `seek(toMs:)`, `setRate`, `reset`.
 - **Callbacks**: `onLoad`, `onLoadError`, `onStateChange`, `onTimeUpdate`, `onEnded`.
 

@@ -68,7 +68,7 @@ description: "react-native-waveform-player 在 iOS 与 Android 上的差异：�
 
 ## 音频焦点与其他应用 {#audio-focus-and-other-apps}
 
-- **iOS：** 开启 `playInBackground` 时，`.playback` session 会打断其他应用的音频。未开启时，本库不改动 session，使用你应用自己的 category。在 iOS 默认 category（`soloAmbient`）下，静音开关会让播放没有声音。
+- **iOS：** 开启 `playInBackground` 或 `ignoreSilentSwitch` 时，`.playback` session 会在开始播放时打断其他应用的音频。未开启时，本库不改动 session，使用你应用自己的 category。在 iOS 默认 category（`soloAmbient`）下，静音开关会让播放没有声音。
 - **Android：** 本库不申请音频焦点，因此语音开始播放时不会要求其他应用暂停或降低音量。
 
 ## 暂停时调用 seekTo() {#seekto-while-paused}

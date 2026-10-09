@@ -132,6 +132,9 @@
         "AudioWaveformView": {
           "className": "AudioWaveformView"
         }
+      },
+      "componentProvider": {
+        "AudioWaveformView": "AudioWaveformView"
       }
     }
   },

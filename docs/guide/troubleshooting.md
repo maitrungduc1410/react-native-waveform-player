@@ -14,10 +14,11 @@ description: "Fixes for common react-native-waveform-player issues: blank view, 
 
 ## No sound on iPhone in silent mode {#no-sound-in-silent-mode}
 
-When `playInBackground` is off, the library does not configure `AVAudioSession`, so your app's category applies. The iOS default category is muted by the Ring / Silent switch. Either:
+By default the library does not configure `AVAudioSession`, so your app's category applies. The iOS default category is muted by the Ring / Silent switch. Either:
 
+- set [`ignoreSilentSwitch`](/guide/props#background), which switches the session to `.playback` when playback starts, or
 - set your app's audio session category to `.playback` yourself (natively, or with an audio library you already use), or
-- turn on [`playInBackground`](/guide/background-playback), which switches the session to `.playback`.
+- turn on [`playInBackground`](/guide/background-playback) if you also want playback to continue in the background. It switches the session to `.playback` the same way.
 
 ## The spinner never stops
 

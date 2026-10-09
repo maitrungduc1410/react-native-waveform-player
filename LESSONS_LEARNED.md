@@ -486,6 +486,61 @@ delta.
 transition," document that consumers should diff against their own
 state, not treat each event as a unique edge.
 
+### 23. Codegen failed and the component was "unimplemented" on RN 0.77
+
+**Symptom.** On a fresh RN 0.77.3 app (New Architecture), `pod install`
+failed with `Unknown prop type for "samples": TSTypeReference`. After
+patching that, the app rendered
+`unimplemented component: <AudioWaveformView>` (GitHub issue #2).
+
+**Root cause.** Two APIs we relied on only exist from RN 0.80:
+
+1. Qualified `CodegenTypes.Float` names. The pre-0.80 codegen parser
+   only recognises bare identifiers (`Float`, `Int32`, `WithDefault`,
+   `DirectEventHandler`), and the `CodegenTypes` export itself does not
+   exist before 0.80.
+2. `codegenConfig.ios.components`. Before 0.80 the generator only reads
+   `ios.componentProvider`; without it, it greps `.mm` files for a
+   `…Cls(` factory we don't have, so the view never lands in
+   `RCTThirdPartyComponentsProvider.mm`.
+
+Importing bare names from `react-native` is not an option: the
+strict-api surface only exports the `CodegenTypes` namespace, so `tsc`
+fails (Lesson #1).
+
+**Fix.** `src/codegenTypes.ts` aliases the bare names off the namespace
+and the spec imports them from there. The codegen parser reads the spec
+file in isolation and matches by name, so it never sees the namespace;
+`tsc` resolves the aliases through strict-api. Added
+`ios.componentProvider` next to `ios.components`; from 0.80 the
+generator prefers `components` when both exist.
+
+**Takeaway.** `peerDependencies: "*"` is a promise. Before using a
+codegen feature, check which RN version introduced it, and run the
+oldest supported version's `@react-native/codegen`
+(`combine-js-to-schema-cli.js`) against `src/` — it takes seconds.
+
+### 24. No sound in silent mode, and mounting a player stopped other apps' music
+
+**Symptom.** With default props, the iOS Ring / Silent switch muted
+playback (GitHub issue #3). Separately, rendering a component with
+`playInBackground` interrupted Spotify before anyone pressed play.
+
+**Root cause.** The library only touched `AVAudioSession` when
+`playInBackground` was set, so the host app's default `.soloAmbient`
+category applied. And the `playInBackground` setter activated the
+`.playback` session immediately, i.e. on mount.
+
+**Fix.** Added `ignoreSilentSwitch` (iOS only). The view forwards
+`playInBackground || ignoreSilentSwitch` to
+`engine.configuresPlaybackSession`, and the engine configures and
+activates the session in `startPlaybackInternal()`. `tearDown()` resets
+both props so a recycled view doesn't inherit them.
+
+**Takeaway.** Activating a `.playback` session is a user-visible side
+effect on other apps. Do it at the moment the user asks for sound,
+never from a prop setter.
+
 ## Things we'd do differently next time
 
 A short list of "if we started over today":

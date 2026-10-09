@@ -14,10 +14,11 @@ description: "react-native-waveform-player 常见问题的解决方法：视图�
 
 ## iPhone 静音模式下没有声音 {#no-sound-in-silent-mode}
 
-`playInBackground` 关闭时，本库不会配置 `AVAudioSession`，因此使用的是你应用自己的 category。iOS 默认 category 会被响铃 / 静音开关静音。你可以：
+默认情况下本库不会配置 `AVAudioSession`，因此使用的是你应用自己的 category。iOS 默认 category 会被响铃 / 静音开关静音。你可以：
 
+- 开启 [`ignoreSilentSwitch`](/zh/guide/props#background)，它会在开始播放时把 session 切换为 `.playback`，或者
 - 自行把应用的 audio session category 设为 `.playback`（在原生代码中，或通过你已在使用的音频库），或者
-- 开启 [`playInBackground`](/zh/guide/background-playback)，它会把 session 切换为 `.playback`。
+- 如果你还希望在后台继续播放，开启 [`playInBackground`](/zh/guide/background-playback)，它会以同样的方式把 session 切换为 `.playback`。
 
 ## 加载指示器一直转 {#the-spinner-never-stops}
 

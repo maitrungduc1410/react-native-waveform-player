@@ -83,6 +83,7 @@ Cách nút chọn tốc độ kế tiếp, và cách `defaultSpeed` tương tác
 | Prop | Kiểu | Mặc định | Mô tả |
 | --- | --- | --- | --- |
 | `playInBackground` | `boolean` | `false` | Tiếp tục phát khi app chuyển xuống nền. Cần thiết lập thêm trên iOS. |
+| `ignoreSilentSwitch` | `boolean` | `false` | Chỉ iOS. Vẫn phát khi bật công tắc Chuông / Im lặng, bằng cách chuyển audio session sang `.playback` khi bắt đầu phát. |
 | `pauseUiUpdatesInBackground` | `boolean` | `true` | Bỏ qua việc vẽ lại thanh và nhãn thời gian khi ở nền. `onTimeUpdate` vẫn tiếp tục được gọi. |
 
 Xem [Phát trong nền](/vi/guide/background-playback) để biết capability bắt buộc trên iOS, quyền `WAKE_LOCK` tùy chọn trên Android và cấu hình cho Expo.

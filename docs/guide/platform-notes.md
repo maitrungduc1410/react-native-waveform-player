@@ -68,7 +68,7 @@ Details in [Background playback](/guide/background-playback).
 
 ## Audio focus and other apps
 
-- **iOS:** with `playInBackground`, the `.playback` session interrupts other apps' audio. Without it, the library leaves the session alone and your app's category applies. With the iOS default category (`soloAmbient`), the silent switch mutes playback.
+- **iOS:** with `playInBackground` or `ignoreSilentSwitch`, the `.playback` session interrupts other apps' audio when playback starts. Without them, the library leaves the session alone and your app's category applies. With the iOS default category (`soloAmbient`), the silent switch mutes playback.
 - **Android:** the library does not request audio focus, so other apps are not asked to pause or lower their volume when a voice note starts.
 
 ## seekTo() while paused

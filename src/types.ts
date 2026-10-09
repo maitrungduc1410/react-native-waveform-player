@@ -220,13 +220,27 @@ export type AudioWaveformViewProps = Omit<ViewProps, 'children'> & {
    *
    * On iOS, the host app must enable the "Audio, AirPlay, and Picture in
    * Picture" Background Mode (`UIBackgroundModes: [audio]` in `Info.plist`).
-   * The library sets the shared `AVAudioSession` category to `.playback`
-   * and activates it, unless the category is already `.playback` or
-   * `.playAndRecord`. On Android, nothing is required for typical use; add
-   * the `WAKE_LOCK` permission if playback must survive device sleep.
+   * When playback starts, the library sets the shared `AVAudioSession`
+   * category to `.playback` and activates it, unless the category is
+   * already `.playback` or `.playAndRecord`. On Android, nothing is required
+   * for typical use; add the `WAKE_LOCK` permission if playback must survive
+   * device sleep.
    * Defaults to `false`.
    */
   playInBackground?: boolean;
+
+  /**
+   * iOS only. Play even when the Ring / Silent switch is set to silent.
+   * When playback starts, the library sets the shared `AVAudioSession`
+   * category to `.playback` and activates it, unless the category is
+   * already `.playback` or `.playAndRecord`. This interrupts audio from
+   * other apps, such as a music app. When `false`, the library leaves the
+   * session alone and your app's category applies; the iOS default category
+   * is muted by the switch. No effect on Android, where the ringer mode
+   * does not mute media playback.
+   * Defaults to `false`.
+   */
+  ignoreSilentSwitch?: boolean;
 
   /**
    * While the app is in the background, skip the bar and time label

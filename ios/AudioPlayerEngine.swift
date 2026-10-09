@@ -74,31 +74,20 @@ final class AudioPlayerEngine {
         // the item has decodable samples queued up.
         player.automaticallyWaitsToMinimizeStalling = false
         // The library does not configure AVAudioSession by default to avoid
-        // surprises; opt-in via `setBackgroundPlaybackEnabled(true)` instead.
+        // surprises; opt-in via `configuresPlaybackSession` instead.
     }
 
-    /// Configure the shared `AVAudioSession` so audio keeps playing when the
-    /// host app is backgrounded. Requires the host app to have the "Audio,
-    /// AirPlay, and Picture in Picture" Background Mode enabled in Info.plist.
+    /// When `true`, every play start switches the shared `AVAudioSession` to
+    /// `.playback` (unless it is already `.playback` / `.playAndRecord`) and
+    /// activates it. That is what lets audio survive backgrounding and play
+    /// through the Ring / Silent switch.
     ///
-    /// Calling with `false` is a no-op — once the session category has been
-    /// switched to `.playback` we leave it alone (the host app may have its
-    /// own audio session management we don't want to step on).
-    func setBackgroundPlaybackEnabled(_ enabled: Bool) {
-        guard enabled else { return }
-        let session = AVAudioSession.sharedInstance()
-        // Don't churn the session if it's already in a playback-capable mode.
-        if session.category == .playback || session.category == .playAndRecord {
-            try? session.setActive(true, options: [])
-            return
-        }
-        do {
-            try session.setCategory(.playback, mode: .default, options: [])
-            try session.setActive(true, options: [])
-        } catch {
-            // Silently ignore — host app likely manages its own session.
-        }
-    }
+    /// The session is touched at play time, not when this flips, because
+    /// activating a `.playback` session interrupts other apps' audio: merely
+    /// rendering a list of players must not stop the user's music. Setting
+    /// it back to `false` leaves the session alone — the host app may have
+    /// its own audio session management we don't want to step on.
+    var configuresPlaybackSession: Bool = false
 
     deinit {
         teardownObservers()
@@ -267,12 +256,27 @@ final class AudioPlayerEngine {
     /// with a queued tap intent. Does NOT fire `onStateChange` — callers
     /// are responsible for that (so we can batch a single notification).
     private func startPlaybackInternal() {
+        activatePlaybackSessionIfNeeded()
         isPlaying = true
         player.rate = rate
         // Calling `player.play()` after setting rate keeps the rate sticky
         // even after a previous .pause() reset it to 0.
         player.play()
         player.rate = rate
+    }
+
+    private func activatePlaybackSessionIfNeeded() {
+        guard configuresPlaybackSession else { return }
+        let session = AVAudioSession.sharedInstance()
+        do {
+            // Don't churn the category if it's already playback-capable.
+            if session.category != .playback && session.category != .playAndRecord {
+                try session.setCategory(.playback, mode: .default, options: [])
+            }
+            try session.setActive(true, options: [])
+        } catch {
+            // Silently ignore — host app likely manages its own session.
+        }
     }
 
     private func handleEnd() {

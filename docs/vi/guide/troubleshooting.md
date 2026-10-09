@@ -14,10 +14,11 @@ description: "Cách sửa lỗi thường gặp với react-native-waveform-play
 
 ## Không có tiếng trên iPhone ở chế độ im lặng {#no-sound-in-silent-mode}
 
-Khi `playInBackground` tắt, thư viện không cấu hình `AVAudioSession`, nên category của app bạn được áp dụng. Category mặc định của iOS bị tắt tiếng bởi công tắc Chuông / Im lặng. Bạn có thể:
+Mặc định thư viện không cấu hình `AVAudioSession`, nên category của app bạn được áp dụng. Category mặc định của iOS bị tắt tiếng bởi công tắc Chuông / Im lặng. Bạn có thể:
 
+- bật [`ignoreSilentSwitch`](/vi/guide/props#background), tùy chọn này chuyển session sang `.playback` khi bắt đầu phát, hoặc
 - tự đặt category audio session của app thành `.playback` (bằng code native, hoặc qua một thư viện audio bạn đang dùng), hoặc
-- bật [`playInBackground`](/vi/guide/background-playback), tùy chọn này chuyển session sang `.playback`.
+- bật [`playInBackground`](/vi/guide/background-playback) nếu bạn cũng muốn tiếp tục phát khi app xuống nền. Tùy chọn này chuyển session sang `.playback` theo cùng cách.
 
 ## Spinner quay mãi không dừng {#the-spinner-never-stops}
 

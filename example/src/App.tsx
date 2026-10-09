@@ -95,6 +95,20 @@ export default function App() {
           />
         </Demo>
 
+        <Demo title="7b. Play through the silent switch (ignoreSilentSwitch)">
+          <Text style={styles.subtle}>
+            iOS only. Flip the Ring / Silent switch to silent, then press play:
+            audio is still audible. Music from another app keeps playing until
+            you press play here, not when this card appears.
+          </Text>
+          <AudioWaveformView
+            source={{ uri: REMOTE_AUDIO }}
+            style={styles.waveform}
+            ignoreSilentSwitch
+            containerBackgroundColor="#7C3AED"
+          />
+        </Demo>
+
         <UnmountDemo />
 
         <EventLogDemo />

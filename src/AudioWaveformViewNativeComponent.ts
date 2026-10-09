@@ -1,77 +1,84 @@
 import {
   codegenNativeComponent,
   codegenNativeCommands,
-  type CodegenTypes,
   type ColorValue,
   type HostComponent,
   type ViewProps,
 } from 'react-native';
 
+import type {
+  DirectEventHandler,
+  Float,
+  Int32,
+  WithDefault,
+} from './codegenTypes';
+
 type Source = Readonly<{ uri: string }>;
 
-type OnLoadEvent = Readonly<{ durationMs: CodegenTypes.Int32 }>;
+type OnLoadEvent = Readonly<{ durationMs: Int32 }>;
 type OnLoadErrorEvent = Readonly<{ message: string }>;
 type OnPlayerStateChangeEvent = Readonly<{
   state: string;
   isPlaying: boolean;
-  speed: CodegenTypes.Float;
+  speed: Float;
   error: string;
 }>;
 type OnTimeUpdateEvent = Readonly<{
-  currentTimeMs: CodegenTypes.Int32;
-  durationMs: CodegenTypes.Int32;
+  currentTimeMs: Int32;
+  durationMs: Int32;
 }>;
-type OnSeekEvent = Readonly<{ positionMs: CodegenTypes.Int32 }>;
+type OnSeekEvent = Readonly<{ positionMs: Int32 }>;
 type OnEndEvent = Readonly<{}>;
 
 export interface NativeProps extends ViewProps {
   source: Source;
-  samples?: ReadonlyArray<CodegenTypes.Float>;
+  samples?: ReadonlyArray<Float>;
 
   playedBarColor?: ColorValue;
   unplayedBarColor?: ColorValue;
 
-  barWidth?: CodegenTypes.WithDefault<CodegenTypes.Float, 3.0>;
-  barGap?: CodegenTypes.WithDefault<CodegenTypes.Float, 2.0>;
+  barWidth?: WithDefault<Float, 3.0>;
+  barGap?: WithDefault<Float, 2.0>;
   // -1 sentinel = "auto" (barWidth / 2)
-  barRadius?: CodegenTypes.WithDefault<CodegenTypes.Float, -1.0>;
+  barRadius?: WithDefault<Float, -1.0>;
   // 0 sentinel = "auto from width"
-  barCount?: CodegenTypes.WithDefault<CodegenTypes.Int32, 0>;
+  barCount?: WithDefault<Int32, 0>;
 
   containerBackgroundColor?: ColorValue;
-  containerBorderRadius?: CodegenTypes.WithDefault<CodegenTypes.Float, 16.0>;
-  showBackground?: CodegenTypes.WithDefault<boolean, true>;
+  containerBorderRadius?: WithDefault<Float, 16.0>;
+  showBackground?: WithDefault<boolean, true>;
 
-  showPlayButton?: CodegenTypes.WithDefault<boolean, true>;
+  showPlayButton?: WithDefault<boolean, true>;
   playButtonColor?: ColorValue;
 
-  showTime?: CodegenTypes.WithDefault<boolean, true>;
+  showTime?: WithDefault<boolean, true>;
   timeColor?: ColorValue;
-  timeMode?: CodegenTypes.WithDefault<'count-up' | 'count-down', 'count-up'>;
+  timeMode?: WithDefault<'count-up' | 'count-down', 'count-up'>;
 
-  showSpeedControl?: CodegenTypes.WithDefault<boolean, true>;
+  showSpeedControl?: WithDefault<boolean, true>;
   speedColor?: ColorValue;
   speedBackgroundColor?: ColorValue;
-  speeds?: ReadonlyArray<CodegenTypes.Float>;
-  defaultSpeed?: CodegenTypes.WithDefault<CodegenTypes.Float, 1.0>;
+  speeds?: ReadonlyArray<Float>;
+  defaultSpeed?: WithDefault<Float, 1.0>;
 
-  autoPlay?: CodegenTypes.WithDefault<boolean, false>;
-  initialPositionMs?: CodegenTypes.WithDefault<CodegenTypes.Int32, 0>;
-  loop?: CodegenTypes.WithDefault<boolean, false>;
-  playInBackground?: CodegenTypes.WithDefault<boolean, false>;
-  pauseUiUpdatesInBackground?: CodegenTypes.WithDefault<boolean, true>;
+  autoPlay?: WithDefault<boolean, false>;
+  initialPositionMs?: WithDefault<Int32, 0>;
+  loop?: WithDefault<boolean, false>;
+  playInBackground?: WithDefault<boolean, false>;
+  ignoreSilentSwitch?: WithDefault<boolean, false>;
+  pauseUiUpdatesInBackground?: WithDefault<boolean, true>;
 
   // -1 sentinel = "uncontrolled" — internal state drives playback.
-  controlledPlaying?: CodegenTypes.WithDefault<CodegenTypes.Int32, -1>;
+  controlledPlaying?: WithDefault<Int32, -1>;
   // -1 sentinel = "uncontrolled" — internal state drives speed.
-  controlledSpeed?: CodegenTypes.WithDefault<CodegenTypes.Float, -1.0>;
+  controlledSpeed?: WithDefault<Float, -1.0>;
 
-  onLoad?: CodegenTypes.DirectEventHandler<OnLoadEvent>;
-  onLoadError?: CodegenTypes.DirectEventHandler<OnLoadErrorEvent>;
-  onPlayerStateChange?: CodegenTypes.DirectEventHandler<OnPlayerStateChangeEvent>;
-  onTimeUpdate?: CodegenTypes.DirectEventHandler<OnTimeUpdateEvent>;
-  onSeek?: CodegenTypes.DirectEventHandler<OnSeekEvent>;
-  onEnd?: CodegenTypes.DirectEventHandler<OnEndEvent>;
+  onLoad?: DirectEventHandler<OnLoadEvent>;
+  onLoadError?: DirectEventHandler<OnLoadErrorEvent>;
+  onPlayerStateChange?: DirectEventHandler<OnPlayerStateChangeEvent>;
+  onTimeUpdate?: DirectEventHandler<OnTimeUpdateEvent>;
+  onSeek?: DirectEventHandler<OnSeekEvent>;
+  onEnd?: DirectEventHandler<OnEndEvent>;
 }
 
 interface NativeCommands {
@@ -80,11 +87,11 @@ interface NativeCommands {
   toggle: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
   seekTo: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
-    positionMs: CodegenTypes.Int32
+    positionMs: Int32
   ) => void;
   setSpeed: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
-    speed: CodegenTypes.Float
+    speed: Float
   ) => void;
 }
 
