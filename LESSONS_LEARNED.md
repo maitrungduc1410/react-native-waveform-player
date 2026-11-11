@@ -24,15 +24,21 @@ up importing `DirectEventHandler` / `WithDefault` types.
 respects those conditions, and the strict-api entry point doesn't
 re-export the codegen type namespace under its old paths.
 
-**Fix.** In `AudioWaveformViewNativeComponent.ts`, import `CodegenTypes`
-as a namespace from `react-native` and use qualified names everywhere:
+**Fix.** Go through the `CodegenTypes` namespace exported from
+`react-native` instead of deep imports. The first version used qualified
+`CodegenTypes.X` names in the spec, which broke codegen on RN < 0.80
+(Lesson #23). The current setup aliases the namespace in
+`src/codegenTypes.ts` and the spec imports the bare names from there:
 
 ```ts
-import { type CodegenTypes } from 'react-native';
+// src/codegenTypes.ts
+import type { CodegenTypes } from 'react-native';
+export type Int32 = CodegenTypes.Int32;
 
-durationMs: CodegenTypes.Int32;
-onLoad?: CodegenTypes.DirectEventHandler<OnLoadEvent>;
-barWidth?: CodegenTypes.WithDefault<CodegenTypes.Float, 3.0>;
+// src/AudioWaveformViewNativeComponent.ts
+import type { Int32, WithDefault, Float } from './codegenTypes';
+durationMs: Int32;
+barWidth?: WithDefault<Float, 3.0>;
 ```
 
 **Takeaway.** When you set `customConditions`, every codegen type import
@@ -518,7 +524,8 @@ generator prefers `components` when both exist.
 **Takeaway.** `peerDependencies: "*"` is a promise. Before using a
 codegen feature, check which RN version introduced it, and run the
 oldest supported version's `@react-native/codegen`
-(`combine-js-to-schema-cli.js`) against `src/` — it takes seconds.
+(`combine-js-to-schema-cli.js`) against `src/`. It takes seconds, and CI
+now does it (`codegen-rn-0-77` job).
 
 ### 24. No sound in silent mode, and mounting a player stopped other apps' music
 
@@ -533,13 +540,36 @@ category applied. And the `playInBackground` setter activated the
 
 **Fix.** Added `ignoreSilentSwitch` (iOS only). The view forwards
 `playInBackground || ignoreSilentSwitch` to
-`engine.configuresPlaybackSession`, and the engine configures and
-activates the session in `startPlaybackInternal()`. `tearDown()` resets
-both props so a recycled view doesn't inherit them.
+`engine.configuresPlaybackSession`, and the engine acquires the session
+in `startPlaybackInternal()` (or right away if the flag turns on while
+already playing). A shared `PlaybackSession` counts the engines holding
+it, activates once, and deactivates with `.notifyOthersOnDeactivation`
+when the last one pauses or ends, so the interrupted music app can
+resume.
 
 **Takeaway.** Activating a `.playback` session is a user-visible side
 effect on other apps. Do it at the moment the user asks for sound,
 never from a prop setter.
+
+### 25. A recycled view kept the previous player's props
+
+**Symptom.** In a list, a new uncontrolled player started playing on
+its own once loaded and its play button did nothing. The view it got
+from the Fabric pool had belonged to a player with `playing={true}`.
+
+**Root cause.** `prepareForRecycle` resets `_props` to the defaults, and
+`updateProps` only forwards props that differ from `_props`. So any prop
+the next mount leaves at its default (`controlledPlaying = -1`,
+`autoPlay`, `loop`, colors...) never reached the Swift impl, which still
+held the old value. `tearDown()` only reset bookkeeping, not props.
+
+**Fix.** The prop forwarding moved to `applyImplPropsFrom:to:` in
+`AudioWaveformView.mm`. `prepareForRecycle` runs it from the current
+`_props` to the defaults before resetting `_props`, then calls
+`tearDown()`. New props get the reset for free.
+
+**Takeaway.** When `_props` is reset, the native view has to be reset to
+the same snapshot. Don't patch it prop by prop.
 
 ## Things we'd do differently next time
 

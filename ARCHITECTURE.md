@@ -181,8 +181,10 @@ Public surface:
 
 - **State**: `state`, `durationMs`, `currentMs`, `isPlaying`, `rate`.
 - **Config**: `loop`, `configuresPlaybackSession` (set by the view from
-  `playInBackground || ignoreSilentSwitch`; the session itself is
-  configured in `startPlaybackInternal()`).
+  `playInBackground || ignoreSilentSwitch`; the session is acquired in
+  `startPlaybackInternal()` and released on pause / end / reset through
+  the shared `PlaybackSession`, which deactivates it when no engine
+  holds it).
 - **Mutation**: `setSource`, `play`, `pause`, `toggle`, `seek(toMs:)`, `setRate`, `reset`.
 - **Callbacks**: `onLoad`, `onLoadError`, `onStateChange`, `onTimeUpdate`, `onEnded`.
 
@@ -405,8 +407,11 @@ Fabric pools component views and reuses them. Without help, an unmounted
 `AudioWaveformView` would keep its `AVPlayer` alive inside the pool and
 keep playing audio.
 
-Fix: `AudioWaveformView.mm` overrides `prepareForRecycle` and calls
-`AudioWaveformViewImpl.tearDown()`, which:
+Fix: `AudioWaveformView.mm` overrides `prepareForRecycle`. It first runs
+`applyImplPropsFrom:to:` from the current `_props` to the defaults (the
+same forwarding `updateProps` uses), because `_props` is reset to the
+defaults and the next mount only forwards props that differ from them.
+Then it calls `AudioWaveformViewImpl.tearDown()`, which:
 
 - Sets `sourceURI = ""` (runs through `applySource` → cancels decoder, resets engine, stops display link).
 - Resets `internalPlaying`, `internalSpeed`, `defaultSpeedApplied`,

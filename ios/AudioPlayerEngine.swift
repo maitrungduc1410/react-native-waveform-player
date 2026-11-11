@@ -84,12 +84,22 @@ final class AudioPlayerEngine {
     ///
     /// The session is touched at play time, not when this flips, because
     /// activating a `.playback` session interrupts other apps' audio: merely
-    /// rendering a list of players must not stop the user's music. Setting
-    /// it back to `false` leaves the session alone — the host app may have
-    /// its own audio session management we don't want to step on.
-    var configuresPlaybackSession: Bool = false
+    /// rendering a list of players must not stop the user's music. The one
+    /// exception is flipping it on while already playing, which is a play
+    /// that has already happened. Setting it back to `false` leaves the
+    /// category alone, since the host app may manage its own session.
+    var configuresPlaybackSession: Bool = false {
+        didSet {
+            guard configuresPlaybackSession, !oldValue, isPlaying else { return }
+            _ = acquirePlaybackSessionIfNeeded()
+        }
+    }
+
+    /// `true` while this engine counts towards `PlaybackSession`'s owners.
+    private var holdsPlaybackSession: Bool = false
 
     deinit {
+        releasePlaybackSession()
         teardownObservers()
         // ARC will release `player` immediately after this returns, and
         // AVPlayer is supposed to stop on dealloc — but in practice it
@@ -122,6 +132,7 @@ final class AudioPlayerEngine {
         // bookkeeping says `isPlaying = false` but AVPlayer is happily
         // playing the new item at the leftover rate.
         player.pause()
+        releasePlaybackSession()
 
         let item = AVPlayerItem(url: url)
         currentItem = item
@@ -205,6 +216,7 @@ final class AudioPlayerEngine {
         guard isPlaying else { return }
         isPlaying = false
         player.pause()
+        releasePlaybackSession()
         onStateChange?()
     }
 
@@ -242,6 +254,7 @@ final class AudioPlayerEngine {
         player.pause()
         player.replaceCurrentItem(with: nil)
         currentItem = nil
+        releasePlaybackSession()
         isPlaying = false
         currentMs = 0
         durationMs = 0
@@ -256,7 +269,10 @@ final class AudioPlayerEngine {
     /// with a queued tap intent. Does NOT fire `onStateChange` — callers
     /// are responsible for that (so we can batch a single notification).
     private func startPlaybackInternal() {
-        activatePlaybackSessionIfNeeded()
+        // If the library switched the category but could not activate the
+        // session, AVPlayer would stay silent while we report "playing".
+        // Stay paused instead so the UI matches what the user hears.
+        guard acquirePlaybackSessionIfNeeded() else { return }
         isPlaying = true
         player.rate = rate
         // Calling `player.play()` after setting rate keeps the rate sticky
@@ -265,18 +281,27 @@ final class AudioPlayerEngine {
         player.rate = rate
     }
 
-    private func activatePlaybackSessionIfNeeded() {
-        guard configuresPlaybackSession else { return }
-        let session = AVAudioSession.sharedInstance()
+    /// Returns `false` only when playback should not start: the session
+    /// could not be activated. Without `configuresPlaybackSession` the host
+    /// app owns the session and this is a no-op.
+    private func acquirePlaybackSessionIfNeeded() -> Bool {
+        guard configuresPlaybackSession else { return true }
+        // Called even when we already hold the session: after an
+        // interruption it has to be activated again. Cheap otherwise.
         do {
-            // Don't churn the category if it's already playback-capable.
-            if session.category != .playback && session.category != .playAndRecord {
-                try session.setCategory(.playback, mode: .default, options: [])
-            }
-            try session.setActive(true, options: [])
+            try PlaybackSession.acquire(ObjectIdentifier(self))
+            holdsPlaybackSession = true
+            return true
         } catch {
-            // Silently ignore — host app likely manages its own session.
+            NSLog("[AudioWaveform] Could not activate AVAudioSession: %@", error.localizedDescription)
+            return false
         }
+    }
+
+    private func releasePlaybackSession() {
+        guard holdsPlaybackSession else { return }
+        holdsPlaybackSession = false
+        PlaybackSession.release(ObjectIdentifier(self))
     }
 
     private func handleEnd() {
@@ -290,6 +315,7 @@ final class AudioPlayerEngine {
             }
         } else {
             isPlaying = false
+            releasePlaybackSession()
             currentMs = durationMs
             state = .ended
             onTimeUpdate?(currentMs, durationMs)
@@ -308,5 +334,56 @@ final class AudioPlayerEngine {
             NotificationCenter.default.removeObserver(endObservation)
         }
         endObservation = nil
+    }
+}
+
+/// The library's share of the process-wide `AVAudioSession`. Every engine
+/// that started playback with `configuresPlaybackSession` holds it; the
+/// session is activated once for the first holder and deactivated with
+/// `.notifyOthersOnDeactivation` when the last one stops, so a music app
+/// that a voice note interrupted gets told it can resume. Main thread only.
+private enum PlaybackSession {
+    private static var owners = Set<ObjectIdentifier>()
+    /// Whether the session is active because of us. Tracked so repeated play
+    /// starts (every scrub resumes playback) skip the blocking `setActive`.
+    private static var isActive = false
+    private static var interruptionObserver: NSObjectProtocol?
+
+    static func acquire(_ owner: ObjectIdentifier) throws {
+        observeInterruptionsOnce()
+        if !isActive {
+            let session = AVAudioSession.sharedInstance()
+            // Don't churn the category if it's already playback-capable.
+            if session.category != .playback && session.category != .playAndRecord {
+                try session.setCategory(.playback, mode: .default, options: [])
+            }
+            try session.setActive(true, options: [])
+            isActive = true
+        }
+        owners.insert(owner)
+    }
+
+    static func release(_ owner: ObjectIdentifier) {
+        owners.remove(owner)
+        guard owners.isEmpty, isActive else { return }
+        isActive = false
+        // Fails harmlessly (`isBusy`) if the host app is still running its
+        // own audio I/O on the shared session.
+        try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+    }
+
+    private static func observeInterruptionsOnce() {
+        guard interruptionObserver == nil else { return }
+        // The system deactivates the session when an interruption begins
+        // (phone call, Siri), so the next play has to activate it again.
+        interruptionObserver = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { note in
+            guard let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  AVAudioSession.InterruptionType(rawValue: raw) == .began else { return }
+            PlaybackSession.isActive = false
+        }
     }
 }

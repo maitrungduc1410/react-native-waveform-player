@@ -234,10 +234,14 @@ export type AudioWaveformViewProps = Omit<ViewProps, 'children'> & {
    * When playback starts, the library sets the shared `AVAudioSession`
    * category to `.playback` and activates it, unless the category is
    * already `.playback` or `.playAndRecord`. This interrupts audio from
-   * other apps, such as a music app. When `false`, the library leaves the
-   * session alone and your app's category applies; the iOS default category
-   * is muted by the switch. No effect on Android, where the ringer mode
-   * does not mute media playback.
+   * other apps, such as a music app, until playback pauses or ends.
+   * `playInBackground` switches the session the same way, so it also plays
+   * through the switch. The session is shared by the whole app and the
+   * library never restores the previous category, so once any player has
+   * switched it, players with this prop off play through the switch too.
+   * With neither prop set and an untouched session, the iOS default
+   * category applies and is muted by the switch. No effect on Android,
+   * where the ringer mode does not mute media playback.
    * Defaults to `false`.
    */
   ignoreSilentSwitch?: boolean;

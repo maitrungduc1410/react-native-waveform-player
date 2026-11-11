@@ -46,9 +46,11 @@ description: "应用进入后台时继续播放语音：playInBackground、iOS A
 
 `.playback` category 在静音开关打开时仍会发声，并且会打断其他应用（例如音乐应用）的音频。如果需要不同的行为，例如与其他音频混音，请在组件挂载前自行把 category 设为带有你所需 options 的 `.playback` 或 `.playAndRecord`，本库会保留该设置。
 
-session 在开始播放时才会被配置，而不是在组件挂载时，因此仅渲染播放器不会打断其他应用的音频，直到用户按下播放。
+session 在开始播放时才会被配置，而不是在组件挂载时，因此仅渲染播放器不会打断其他应用的音频，直到开始播放（用户按下播放、`autoPlay` 或 `playing`）。如果在播放过程中开启其中一个 prop，session 会立即被配置。
 
-把 `playInBackground` 改回 `false` 不会恢复之前的 category。
+当最后一个配置过 session 的播放器暂停或播放结束时，本库会以 `.notifyOthersOnDeactivation` 停用 session，被打断的音乐应用可以继续播放。
+
+session 由整个应用共享。把 `playInBackground` 或 `ignoreSilentSwitch` 改回 `false` 不会恢复之前的 category；一旦有播放器把它切换为 `.playback`，所有播放器在静音开关打开时都会发声。
 
 当 `playInBackground` 和 `ignoreSilentSwitch` 都为 `false` 时，本库完全不会改动 `AVAudioSession`。这意味着什么，请参阅[iPhone 静音模式下没有声音](/zh/guide/troubleshooting#no-sound-in-silent-mode)。
 

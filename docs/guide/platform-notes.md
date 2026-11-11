@@ -61,7 +61,7 @@ Speeds with one decimal place (`0.5`, `1`, `1.5`, `2`) show the same digits on b
 
 ## Background
 
-- **iOS** pauses on `didEnterBackground`. Background audio needs the Audio background mode, and the library switches `AVAudioSession` to `.playback` when `playInBackground` is on.
+- **iOS** pauses on `didEnterBackground`. Background audio needs the Audio background mode, and with `playInBackground` on, the library switches `AVAudioSession` to `.playback` when playback starts.
 - **Android** pauses on `onHostPause`, which also fires when another activity covers yours. Device sleep needs the optional `WAKE_LOCK` permission.
 
 Details in [Background playback](/guide/background-playback).

@@ -110,7 +110,7 @@ for the full "add a prop / event / command" walkthroughs.
 
 | You want to… | Touch these files |
 |---|---|
-| Add a prop | `src/AudioWaveformViewNativeComponent.ts`, `src/types.ts` (`AudioWaveformViewProps` + TSDoc), `src/AudioWaveformView.native.tsx`, `ios/AudioWaveformViewImpl.swift`, `ios/AudioWaveformView.mm` (`updateProps`), `android/.../AudioWaveformView.kt`, `android/.../AudioWaveformViewManager.kt`, `docs/guide/props.md` (en, vi, zh) |
+| Add a prop | `src/AudioWaveformViewNativeComponent.ts`, `src/types.ts` (`AudioWaveformViewProps` + TSDoc), `src/AudioWaveformView.native.tsx`, `ios/AudioWaveformViewImpl.swift`, `ios/AudioWaveformView.mm` (`applyImplPropsFrom:to:`), `android/.../AudioWaveformView.kt`, `android/.../AudioWaveformViewManager.kt`, `docs/guide/props.md` (en, vi, zh) |
 | Add an event | codegen spec (payload + `DirectEventHandler`), `src/types.ts` (payload type, callback prop + TSDoc), `AudioWaveformView.native.tsx` (unwrap), `ios/AudioWaveformView.mm` (`emitOn*`), `ios/AudioWaveformViewImpl.swift` (the closure), `android/.../AudioWaveformView.kt` (the closure), `android/.../AudioWaveformViewManager.kt` (`wireEvents`), `docs/guide/events.md` (en, vi, zh) |
 | Add a command | codegen spec (`NativeCommands` + `supportedCommands`), `AudioWaveformView.native.tsx` (`useImperativeHandle`), `ios/AudioWaveformView.mm` (`handleCommand:`), `ios/AudioWaveformViewImpl.swift` (the impl), `android/.../AudioWaveformView.kt` + `…ViewManager.kt`, `AudioWaveformViewRef` + TSDoc in `src/types.ts`, `docs/guide/ref-methods.md` (en, vi, zh) |
 | Change audio behaviour (state, play/pause, seek, rate) | `ios/AudioPlayerEngine.swift` and `android/.../AudioPlayerEngine.kt`. Keep the two in lockstep. |
@@ -136,7 +136,9 @@ for the full "add a prop / event / command" walkthroughs.
 - **Fabric view recycling on iOS.** `prepareForRecycle` calls
   `tearDown()`. If you add a new system resource (timer, observer,
   network task) to `AudioWaveformViewImpl`, also reset it in `tearDown()`
-  ([Lesson #11](./LESSONS_LEARNED.md)).
+  ([Lesson #11](./LESSONS_LEARNED.md)). Forward props only through
+  `applyImplPropsFrom:to:` in the `.mm`, which `prepareForRecycle` also
+  uses to push the defaults ([Lesson #25](./LESSONS_LEARNED.md)).
 - **Codegen `customConditions`.** Keep the strict-api flag in
   `tsconfig.json` and import codegen types through `src/codegenTypes.ts`
   ([Lessons #1 and #23](./LESSONS_LEARNED.md)).
@@ -150,13 +152,13 @@ for the full "add a prop / event / command" walkthroughs.
 ## Before you start coding — scan LESSONS_LEARNED
 
 This is the single most important habit for this repo.
-[LESSONS_LEARNED.md](./LESSONS_LEARNED.md) has 24 numbered entries
+[LESSONS_LEARNED.md](./LESSONS_LEARNED.md) has 25 numbered entries
 describing the exact bugs we hit and how we fixed them. **Before you
 modify any subsystem, do a quick keyword search in that file** for
 the area you're touching:
 
 - Touching codegen / TS types → check entries 1–3 and 23.
-- Touching iOS playback / loading / gestures / audio session → check 4–12 and 24.
+- Touching iOS playback / loading / gestures / audio session → check 4–12, 24 and 25.
 - Touching Android playback / lifecycle / gestures → check 13–17.
 - Touching UX (controlled mode, loading state, background) → 18–21.
 
@@ -184,7 +186,7 @@ For any change beyond a doc edit:
 5. **Re-scan [LESSONS_LEARNED.md](./LESSONS_LEARNED.md)** for the
    subsystem you touched. Make sure your change doesn't reintroduce
    a fixed bug. If you fixed a new class of bug worth remembering,
-   add a 22nd entry to that file.
+   add a new numbered entry to that file.
 
 There is currently **no automated test suite**. Manual testing in the
 example app is the canonical "did this regress anything" check.

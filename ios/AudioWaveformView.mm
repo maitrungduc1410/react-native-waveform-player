@@ -136,8 +136,17 @@ using namespace facebook::react;
   const auto &oldViewProps =
       *std::static_pointer_cast<AudioWaveformViewProps const>(_props);
   const auto &newViewProps = *std::static_pointer_cast<AudioWaveformViewProps const>(props);
+  [self applyImplPropsFrom:oldViewProps to:newViewProps];
+  [super updateProps:props oldProps:oldProps];
+}
 
-  // Source URI
+// Forwards every prop that differs between the two snapshots to `_impl`.
+// Shared by `updateProps` and `prepareForRecycle` so both paths stay in sync.
+- (void)applyImplPropsFrom:(const AudioWaveformViewProps &)oldViewProps
+                        to:(const AudioWaveformViewProps &)newViewProps
+{
+  // Source URI. Applied first, so a recycle stops playback before anything else.
+
   if (oldViewProps.source.uri != newViewProps.source.uri) {
     NSString *uri = [NSString stringWithUTF8String:newViewProps.source.uri.c_str()];
     _impl.sourceURI = uri ?: @"";
@@ -265,8 +274,6 @@ using namespace facebook::react;
   if (oldViewProps.controlledSpeed != newViewProps.controlledSpeed) {
     _impl.controlledSpeed = newViewProps.controlledSpeed;
   }
-
-  [super updateProps:props oldProps:oldProps];
 }
 
 - (NSArray<NSNumber *> *)speedsArrayFrom:(const std::vector<Float> &)values
@@ -302,13 +309,23 @@ using namespace facebook::react;
 
 - (void)prepareForRecycle
 {
-  // Stop the player BEFORE anything else — Fabric pools this component view,
-  // so without an explicit teardown the underlying AVPlayer happily keeps
-  // playing inside the pool after the React component has unmounted. See
-  // `AudioWaveformViewImpl.tearDown()` for the full reset sequence.
+  // Fabric pools this component view, so without an explicit teardown the
+  // underlying AVPlayer keeps playing inside the pool after the React
+  // component has unmounted. The source is the first prop applied below, so
+  // playback stops before anything else. See `AudioWaveformViewImpl.tearDown()`
+  // for the rest of the reset sequence.
+  //
+  // `_props` is reset to the defaults below, so the next mount only forwards
+  // props that differ from them. Push the defaults into the impl first so it
+  // agrees with `_props`; otherwise a prop the next mount leaves at its
+  // default (autoPlay, playing, loop, colors...) keeps the old mount's value.
+  static const auto defaultProps = std::make_shared<const AudioWaveformViewProps>();
+  [self applyImplPropsFrom:*std::static_pointer_cast<AudioWaveformViewProps const>(_props)
+                        to:*defaultProps];
+  // After the setters above, which can touch bookkeeping such as
+  // `defaultSpeedApplied`.
   [_impl tearDown];
   [super prepareForRecycle];
-  static const auto defaultProps = std::make_shared<const AudioWaveformViewProps>();
   _props = defaultProps;
 }
 

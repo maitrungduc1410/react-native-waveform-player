@@ -156,9 +156,9 @@ public final class AudioWaveformViewImpl: UIView {
     }
 
     /// Play through the Ring / Silent switch by switching the shared
-    /// `AVAudioSession` to `.playback` when playback starts. Default `false`
-    /// — the host app's category applies (iOS default `.soloAmbient` is
-    /// muted by the switch).
+    /// `AVAudioSession` to `.playback` when playback starts. Default `false`:
+    /// unless `playInBackground` is on, the host app's category applies (the
+    /// iOS default `.soloAmbient` is muted by the switch).
     public var ignoreSilentSwitch: Bool = false {
         didSet { updatePlaybackSessionRequirement() }
     }
@@ -837,12 +837,6 @@ public final class AudioWaveformViewImpl: UIView {
         timeLabel.text = "0:00"
         playButton.isPlaying = false
         playButton.isLoading = false
-        // `prepareForRecycle` resets `_props` to the defaults, so a prop that
-        // the next mount leaves at its default never reaches `updateProps`.
-        // Without this reset a recycled view would keep switching the audio
-        // session for a player that never asked for it.
-        playInBackground = false
-        ignoreSilentSwitch = false
         // Match the `internalSpeed = 1.0` reset above so the pill doesn't
         // briefly flash a stale "2.0x" before the new mount's defaultSpeed
         // prop setter (if any) re-applies the right value.

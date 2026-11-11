@@ -61,7 +61,7 @@ description: "react-native-waveform-player 在 iOS 与 Android 上的差异：�
 
 ## 后台 {#background}
 
-- **iOS** 在 `didEnterBackground` 时暂停。后台音频需要 Audio 后台模式，开启 `playInBackground` 时本库会把 `AVAudioSession` 切换为 `.playback`。
+- **iOS** 在 `didEnterBackground` 时暂停。后台音频需要 Audio 后台模式，开启 `playInBackground` 时，本库会在开始播放时把 `AVAudioSession` 切换为 `.playback`。
 - **Android** 在 `onHostPause` 时暂停，另一个 activity 遮住你的 activity 时也会触发。设备休眠时继续播放需要可选的 `WAKE_LOCK` 权限。
 
 详见[后台播放](/zh/guide/background-playback)。

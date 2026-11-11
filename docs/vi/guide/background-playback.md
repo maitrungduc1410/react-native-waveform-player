@@ -46,9 +46,11 @@ Khi bắt đầu phát mà `playInBackground` (hoặc `ignoreSilentSwitch`) đan
 
 Category `.playback` vẫn phát kể cả khi bật công tắc im lặng, và nó ngắt âm thanh của các app khác, chẳng hạn app nghe nhạc. Nếu bạn cần hành vi khác, ví dụ phát trộn với âm thanh khác, hãy tự đặt category thành `.playback` hoặc `.playAndRecord` với các option của bạn trước khi component được mount. Thư viện sẽ giữ nguyên cấu hình đó.
 
-Session được cấu hình khi bắt đầu phát, không phải khi component được mount, nên việc render một player không ngắt âm thanh của app khác cho đến khi người dùng bấm phát.
+Session được cấu hình khi bắt đầu phát, không phải khi component được mount, nên việc render một player không ngắt âm thanh của app khác cho đến khi bắt đầu phát (người dùng bấm, `autoPlay` hoặc `playing`). Nếu bật một trong hai prop khi âm thanh đang phát, session được cấu hình ngay.
 
-Đặt `playInBackground` về lại `false` không khôi phục category trước đó.
+Khi player cuối cùng đã cấu hình session tạm dừng hoặc phát xong, thư viện tắt session với `.notifyOthersOnDeactivation`, để app nghe nhạc bị ngắt có thể phát tiếp.
+
+Session dùng chung cho cả app. Đặt `playInBackground` hoặc `ignoreSilentSwitch` về lại `false` không khôi phục category trước đó, và khi đã có một player chuyển nó sang `.playback`, mọi player đều phát kể cả khi bật công tắc im lặng.
 
 Khi cả `playInBackground` và `ignoreSilentSwitch` đều là `false`, thư viện hoàn toàn không động đến `AVAudioSession`. Xem [Không có tiếng trên iPhone ở chế độ im lặng](/vi/guide/troubleshooting#no-sound-in-silent-mode) để hiểu điều này có nghĩa gì.
 

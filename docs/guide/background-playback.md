@@ -46,9 +46,11 @@ When playback starts with `playInBackground` (or `ignoreSilentSwitch`) on, the l
 
 The `.playback` category plays even when the silent switch is on, and it interrupts audio from other apps, such as a music app. If you need different behavior, for example mixing with other audio, set the category yourself to `.playback` or `.playAndRecord` with your options before the component mounts. The library keeps it.
 
-The session is configured when playback starts, not when the component mounts, so rendering a player does not interrupt other apps' audio until the user presses play.
+The session is configured when playback starts, not when the component mounts, so rendering a player does not interrupt other apps' audio until playback starts (a press, `autoPlay` or `playing`). Turning either prop on while audio is already playing configures it right away.
 
-Setting `playInBackground` back to `false` does not restore the previous category.
+When the last player that configured the session pauses or ends, the library deactivates it with `.notifyOthersOnDeactivation`, so an interrupted music app can resume.
+
+The session is shared by the whole app. Setting `playInBackground` or `ignoreSilentSwitch` back to `false` does not restore the previous category, and once any player has switched it to `.playback`, every player plays through the silent switch.
 
 When both `playInBackground` and `ignoreSilentSwitch` are `false`, the library does not touch `AVAudioSession` at all. See [No sound on iPhone in silent mode](/guide/troubleshooting#no-sound-in-silent-mode) for what that means.
 

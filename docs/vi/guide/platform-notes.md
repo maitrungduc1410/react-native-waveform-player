@@ -61,7 +61,7 @@ Các tốc độ có một chữ số thập phân (`0.5`, `1`, `1.5`, `2`) hi�
 
 ## Phát trong nền {#background}
 
-- **iOS** tạm dừng khi `didEnterBackground`. Âm thanh nền cần background mode Audio, và thư viện chuyển `AVAudioSession` sang `.playback` khi `playInBackground` được bật.
+- **iOS** tạm dừng khi `didEnterBackground`. Âm thanh nền cần background mode Audio, và khi `playInBackground` được bật, thư viện chuyển `AVAudioSession` sang `.playback` lúc bắt đầu phát.
 - **Android** tạm dừng khi `onHostPause`, event này cũng xảy ra khi một activity khác che activity của bạn. Phát khi thiết bị ngủ cần quyền tùy chọn `WAKE_LOCK`.
 
 Chi tiết xem ở [Phát trong nền](/vi/guide/background-playback).

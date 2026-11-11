@@ -32,6 +32,29 @@ jobs:
         run: yarn typecheck
 
 
+  # peerDependencies accepts any RN version, and codegen before 0.80 is
+  # stricter about the spec than the version we develop on (Lesson #23).
+  codegen-rn-0-77:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Parse the spec with the RN 0.77 codegen
+        working-directory: ${{ runner.temp }}
+        run: |
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund --ignore-scripts @react-native/codegen@0.77.3
+          node node_modules/@react-native/codegen/lib/cli/combine/combine-js-to-schema-cli.js schema.json "$GITHUB_WORKSPACE/src"
+          node -e "
+            const schema = require('./schema.json');
+            if (!schema.modules.AudioWaveformView?.components?.AudioWaveformView) {
+              console.error('AudioWaveformView is missing from the codegen schema');
+              process.exit(1);
+            }
+          "
+
   build-library:
     runs-on: ubuntu-latest
 
